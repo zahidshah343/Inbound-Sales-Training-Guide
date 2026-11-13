@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inbound Sales · Training OS</title>
+  <style>
+    /* ========== DESIGN TOKENS ========== */
+    :root {
+      --bg-deep: #0a0e1a;
+      --bg-panel: #111827;
+      --bg-card: #161f2f;
+      --bg-card-hover: #1c283b;
+      --border-subtle: #233047;
+      --border-strong: #2e3f5c;
+      --text-primary: #e8eef7;
+      --text-secondary: #94a3b8;
+      --text-muted: #5f728d;
+      --accent: #6ee7b7;
+      --accent-dim: #34d399;
+      --accent-warm: #fbbf24;
+      --accent-cool: #60a5fa;
+      --accent-pink: #f472b6;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', 'Courier New', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg-deep);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(110, 231, 183, 0.06), transparent),
+        radial-gradient(ellipse 60% 50% at 90% 110%, rgba(96, 165, 250, 0.05), transparent);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.55;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      background: rgba(17, 24, 39, 0.72);
+      backdrop-filter: blur(14px);
+      border-right: 1px solid var(--border-subtle);
+      padding: 2rem 1.5rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-mark {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-cool));
+      display: grid; place-items: center;
+      font-weight: 800;
+      color: #06121a;
+      font-size: 1.1rem;
+      box-shadow: 0 0 24px rgba(110, 231, 183, 0.3);
+    }
+
+    .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .brand-text strong { font-size: 0.95rem; letter-spacing: -0.01em; }
+    .brand-text span { font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.03em; }
+
+    .nav-label {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin: 1.2rem 0 0.6rem 0.25rem;
+    }
+
+    /* Nav action reset & styles */
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      border: 1px solid transparent;
+      cursor: pointer;
+      width: 100%;
+      background: transparent;
+      font-family: inherit;
+      text-align: left;
+    }
+    .nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+    
+    /* Active State */
+    .nav-item.active {
+      background: rgba(110, 231, 183, 0.08);
+      color: var(--accent);
+      border-color: rgba(110, 231, 183, 0.2);
+    }
+    .nav-num { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); width: 22px; flex-shrink: 0; }
+    .nav-item.active .nav-num { color: var(--accent-dim); }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .sidebar-footer a { color: var(--accent); text-decoration: none; }
+    .sidebar-footer a:hover { text-decoration: underline; }
+
+    /* ========== MAIN ========== */
+    .main {
+      padding: 2.5rem 3rem 4rem;
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+
+    .topline h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      background: linear-gradient(120deg, var(--text-primary) 30%, var(--accent) 120%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .topline .meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      text-align: right;
+    }
+    .meta .tag {
+      display: inline-block;
+      background: rgba(96, 165, 250, 0.1);
+      color: var(--accent-cool);
+      padding: 0.2rem 0.65rem;
+      border-radius: 100px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      border: 1px solid rgba(96, 165, 250, 0.25);
+      align-self: flex-end;
+    }
+
+    /* ========== SECTION CARDS ========== */
+    .section {
+      margin-bottom: 1.25rem;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color 0.2s;
+      /* offset for sticky nav scrolling */
+      scroll-margin-top: 2rem; 
+    }
+    .section:hover { border-color: var(--border-strong); }
+
+    .section-header {
+      padding: 1.35rem 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.012);
+    }
+
+    .section-index {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      padding: 0.15rem 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .section-title { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; flex: 1; }
+
+    .section-body {
+      padding: 0 1.75rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    /* definition rows */
+    .def {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 1.25rem;
+      padding: 0.85rem 0;
+      border-top: 1px dashed var(--border-subtle);
+      font-size: 0.9rem;
+    }
+    .def:first-child { border-top: none; padding-top: 0.25rem; }
+    .def dt { font-weight: 600; color: var(--accent); font-size: 0.85rem; padding-top: 0.05rem; }
+    .def dd { color: var(--text-secondary); }
+    .def dd strong { color: var(--text-primary); font-weight: 600; }
+    .def dd em { color: var(--accent-warm); font-style: normal; font-weight: 500; }
+
+    .caveat {
+      background: rgba(251, 191, 36, 0.06);
+      border-left: 3px solid var(--accent-warm);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 0.65rem 1rem;
+      font-size: 0.83rem;
+      color: #f5d690;
+      margin: 0.3rem 0;
+    }
+    .caveat strong { color: var(--accent-warm); }
+
+    /* ========== BENTO ========== */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+      padding: 0.25rem 1.75rem 1.5rem;
+    }
+
+    .bento-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 1.15rem;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    }
+    .bento-card:hover { background: var(--bg-card-hover); border-color: var(--border-strong); transform: translateY(-2px); }
+
+    .bento-head { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.85rem; }
+    .bento-code { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; letter-spacing: 0.02em; }
+    .bento-code.cgp { color: var(--accent); }
+    .bento-code.tci { color: var(--accent-warm); }
+    .bento-code.ba  { color: var(--accent-pink); }
+    .bento-sub { font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .bento-card ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .bento-card li { font-size: 0.82rem; color: var(--text-secondary); padding-left: 0.9rem; position: relative; }
+    .bento-card li::before {
+      content: ''; position: absolute; left: 0; top: 0.55em;
+      width: 5px; height: 5px; border-radius: 50%; background: var(--border-strong);
+    }
+    .bento-card li strong { color: var(--text-primary); display: block; font-size: 0.8rem; margin-bottom: 0.1rem; }
+
+    /* ========== ANALYSIS ========== */
+    .analysis {
+      margin: 0 1.75rem 1.5rem;
+      background: rgba(96, 165, 250, 0.04);
+      border: 1px solid rgba(96, 165, 250, 0.15);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 1.25rem;
+    }
+    .analysis h4 {
+      font-size: 0.78rem; font-family: var(--font-mono);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--accent-cool); margin-bottom: 0.85rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .analysis h4::before { content: '◈'; color: var(--accent-cool); }
+    .analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.65rem; }
+    .analysis-item {
+      background: var(--bg-card); border-radius: var(--radius-sm);
+      padding: 0.7rem 0.85rem; font-size: 0.82rem;
+      color: var(--text-secondary); border-left: 3px solid var(--border-strong);
+    }
+    .analysis-item.needs-ba { border-left-color: var(--accent-pink); }
+    .analysis-item.needs-cgp { border-left-color: var(--accent); }
+    .analysis-item.needs-tci { border-left-color: var(--accent-warm); }
+    .analysis-item strong { color: var(--text-primary); }
+
+    /* ========== PHASE TIMELINE ========== */
+    .phase-track {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      padding: 0.5rem 1.75rem 1.75rem;
+    }
+
+    .phase-step {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.35rem 1rem 1rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .phase-step:hover { background: var(--bg-card-hover); border-color: var(--border-strong); }
+
+    .phase-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -0.6rem;
+      width: 0.6rem;
+      height: 1px;
+      background: var(--border-strong);
+      transform: translateY(-50%);
+      z-index: 0;
+    }
+
+    .phase-step::before {
+      content: attr(data-step);
+      position: absolute;
+      top: -0.55rem;
+      left: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #06121a;
+      background: var(--accent);
+      border-radius: 100px;
+      padding: 0.1rem 0.55rem;
+      letter-spacing: 0.02em;
+    }
+
+    .phase-step h5 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.45rem;
+    }
+    .phase-step p { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; }
+    .phase-step p strong { color: var(--accent); font-weight: 600; }
+
+    /* ========== NUMBERED CLOSING LIST ========== */
+    .numbered-list {
+      counter-reset: item;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .numbered-list li {
+      counter-increment: item;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.9rem;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      padding: 0.75rem 0;
+      border-top: 1px dashed var(--border-subtle);
+      line-height: 1.55;
+    }
+    .numbered-list li:first-child { border-top: none; padding-top: 0.25rem; }
+    .numbered-list li::before {
+      content: counter(item, decimal-leading-zero);
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-dim);
+      background: rgba(110, 231, 183, 0.08);
+      border: 1px solid rgba(110, 231, 183, 0.2);
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.05rem;
+    }
+    .numbered-list li strong { color: var(--text-primary); font-weight: 600; }
+
+    .kbd {
+      font-family: var(--font-mono);
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      padding: 0.1rem 0.45rem;
+      font-size: 0.78rem;
+      color: var(--accent-warm);
+    }
+
+    /* responsive */
+    @media (max-width: 1000px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: relative; height: auto;
+        border-right: none; border-bottom: 1px solid var(--border-subtle);
+        padding: 1.25rem 1.5rem;
+      }
+      .nav-label, .sidebar-footer { display: none; }
+      .sidebar nav { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+      .main { padding: 1.75rem 1.5rem 3rem; }
+      .bento { grid-template-columns: 1fr; }
+      .def { grid-template-columns: 1fr; gap: 0.3rem; }
+      .def dt { font-size: 0.8rem; }
+      .phase-track { grid-template-columns: 1fr 1fr; }
+      .phase-step:not(:last-child)::after { display: none; }
+    }
+    @media (max-width: 620px) {
+      .topline h1 { font-size: 1.6rem; }
+      .topline .meta { text-align: left; }
+      .meta .tag { align-self: flex-start; }
+      .phase-track { grid-template-columns: 1fr; }
+      .section-header { padding: 1.1rem 1.25rem; }
+      .section-body { padding: 0 1.25rem 1.25rem; }
+      .bento { padding-left: 1.25rem; padding-right: 1.25rem; }
+      .analysis { margin: 0 1.25rem 1.25rem; }
+      .phase-track { padding-left: 1.25rem; padding-right: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">⟁</div>
+        <div class="brand-text">
+          <strong>Inbound OS</strong>
+          <span>sales · v2.4</span>
+        </div>
+      </div>
+
+      <div class="nav-label">Modules</div>
+      <!-- Converted from anchor links to buttons to prevent URL hash updates -->
+      <nav id="nav-menu">
+        <button class="nav-item active" data-target="m1"><span class="nav-num">01</span> Fundamentals</button>
+        <button class="nav-item" data-target="m2"><span class="nav-num">02</span> Buyer types</button>
+        <button class="nav-item" data-target="m3"><span class="nav-num">03</span> Buyer's journey</button>
+        <button class="nav-item" data-target="m4"><span class="nav-num">04</span> 4 phases</button>
+        <button class="nav-item" data-target="m5"><span class="nav-num">05</span> CGP · TCI · BA</button>
+        <button class="nav-item" data-target="m6"><span class="nav-num">06</span> Closing</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div>Prepared by<br><strong style="color: var(--text-secondary);">Syed Zahid Ali</strong></div>
+        <div style="margin-top: 0.6rem;">
+          <a href="https://linkedin.com/in/zahishahh" target="_blank" rel="noopener">linkedin.com/in/zahishahh ↗</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <div class="topline">
+        <h1>HubSpot Inbound Sales<br>Certification Guide</h1>
+        <div class="meta">
+          <span class="tag">TRAINING MANUAL</span>
+          <span>Core concepts &amp; frameworks</span>
+          <span style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.72rem;">no exam tips · pure facts</span>
+        </div>
+      </div>
+
+      <!-- 1 -->
+      <section class="section" id="m1">
+        <div class="section-header">
+          <span class="section-index">01</span>
+          <span class="section-title">Inbound sales fundamentals</span>
+        </div>
+        <div class="section-body">
+          <dl>
+            <div class="def"><dt>Inbound strategy</dt><dd>Identify people who <strong>might already be interested</strong> in your offering. Help the buyer make progress in defining or solving their problem.</dd></div>
+            <div class="def"><dt>Process vs. strategy</dt><dd>A sales process describes the steps a <strong>seller</strong> takes; an inbound sales strategy describes the steps a <strong>buyer</strong> takes.</dd></div>
+            <div class="def"><dt>Lead response time</dt><dd>Contact inbound leads <strong>preferably within minutes</strong> of receiving them.</dd></div>
+            <div class="def"><dt>Message length</dt><dd>Voicemails under <span class="kbd">15s</span>; emails under <span class="kbd">200 words</span>. Keep it short.</dd></div>
+            <div class="def"><dt>Outreach focus</dt><dd>Reference the buyer and their situation more than the seller.</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section class="section" id="m2">
+        <div class="section-header">
+          <span class="section-index">02</span>
+          <span class="section-title">Buyer types &amp; personas</span>
+        </div>
+        <div class="section-body">
+          <dl>
+            <div class="def"><dt>Active buyer</dt><dd>Actively researching a goal or challenge. Most often in the <strong>Consideration stage</strong>.</dd></div>
+            <div class="def"><dt>Passive buyer</dt><dd>A good fit for your offering but not looking to buy right now. Do not wait to identify active buyers before identifying passive ones.</dd></div>
+            <div class="def"><dt>Inbound lead</dt><dd>A person who visited your website and identified themselves in some way.</dd></div>
+            <div class="def"><dt>Trigger event</dt><dd>Anything indicating you could provide immediate value (press releases, job postings, social mentions of keywords or competitors).</dd></div>
+            <div class="def"><dt>ICP vs. persona</dt><dd>An ICP broadly describes a target market (company type or population segment); buyer personas define specific sorts of people within that market.</dd></div>
+          </dl>
+          <div class="caveat"><strong>Note:</strong> Submitting a form on your website is an inbound lead, <em>not</em> a trigger event.</div>
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="section" id="m3">
+        <div class="section-header">
+          <span class="section-index">03</span>
+          <span class="section-title">Buyer's journey &amp; salesperson's role</span>
+        </div>
+        <div class="section-body">
+          <dl>
+            <div class="def"><dt>Awareness</dt><dd>Buyer is identifying a challenge or opportunity. <em>Role:</em> help them define goals and challenges.</dd></div>
+            <div class="def"><dt>Consideration</dt><dd>Buyer evaluates different approaches to solve a challenge. <em>Role:</em> help them understand the different ways they might address a goal or challenge.</dd></div>
+            <div class="def"><dt>Decision</dt><dd>Buyer is choosing a specific solution. <em>Role:</em> help weigh pros and cons of your solution relative to other options.</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="section" id="m4">
+        <div class="section-header">
+          <span class="section-index">04</span>
+          <span class="section-title">The 4 phases of inbound sales strategy</span>
+        </div>
+        <div class="phase-track">
+          <div class="phase-step" data-step="01">
+            <h5>Identify</h5>
+            <p>Find good-fit leads from a large pool. Research active/passive buyers. <strong>Do not help leads identify goals here</strong> — that's Explore.</p>
+          </div>
+          <div class="phase-step" data-step="02">
+            <h5>Connect</h5>
+            <p>Outreach focus. Transition to Explore only when the buyer confirms interest in discussing a goal or challenge.</p>
+          </div>
+          <div class="phase-step" data-step="03">
+            <h5>Explore</h5>
+            <p>Act as expert, help sort through goals/challenges. Guide to right conclusion, even if it's not you. <strong>Diagnose first — no feature pitching.</strong></p>
+          </div>
+          <div class="phase-step" data-step="04">
+            <h5>Advise</h5>
+            <p>Present a plan closing the gap between <strong>where they are now and where they want to be</strong>. No generic company info.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section class="section" id="m5">
+        <div class="section-header">
+          <span class="section-index">05</span>
+          <span class="section-title">The CGP, TCI, BA framework</span>
+        </div>
+
+        <div class="bento">
+          <div class="bento-card">
+            <div class="bento-head">
+              <span class="bento-code cgp">CGP</span>
+              <span class="bento-sub">Current situation</span>
+            </div>
+            <ul>
+              <li><strong>Goals</strong> What they want to achieve.</li>
+              <li><strong>Challenges</strong> What is stopping them.</li>
+              <li><strong>Plans</strong> How they intend to fix it. <em style="color: var(--accent-warm); font-style: normal;">"Thinking about moving into a larger facility."</em></li>
+            </ul>
+          </div>
+          <div class="bento-card">
+            <div class="bento-head">
+              <span class="bento-code tci">TCI</span>
+              <span class="bento-sub">Urgency &amp; impact</span>
+            </div>
+            <ul>
+              <li><strong>Timeline</strong> When they need it done. <em style="color: var(--accent-warm); font-style: normal;">"Before end of quarter."</em></li>
+              <li><strong>Consequences</strong> What happens if they fail. <em style="color: var(--accent-warm); font-style: normal;">"I'll lay off employees."</em></li>
+              <li><strong>Implications</strong> What happens if they succeed. <em style="color: var(--accent-warm); font-style: normal;">"Open a second location."</em></li>
+            </ul>
+          </div>
+          <div class="bento-card">
+            <div class="bento-head">
+              <span class="bento-code ba">BA</span>
+              <span class="bento-sub">Logistics</span>
+            </div>
+            <ul>
+              <li><strong>Budget</strong> Ask openly how much they plan to invest.</li>
+              <li><strong>Authority</strong> Ask who else needs to be involved. Avoid "Are you the right person?"</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="analysis">
+          <h4>Agenda analysis · spotting flaws</h4>
+          <div class="analysis-grid">
+            <div class="analysis-item needs-ba">Covers CGP + TCI but skips budget / sign-off → needs <strong>BA improvement</strong>.</div>
+            <div class="analysis-item needs-cgp">Skips the prospect's specific goals → needs <strong>CGP improvement</strong>.</div>
+            <div class="analysis-item needs-tci">Skips what happens if they fail / succeed → needs <strong>TCI improvement</strong>.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section class="section" id="m6">
+        <div class="section-header">
+          <span class="section-index">06</span>
+          <span class="section-title">Presentations &amp; closing</span>
+        </div>
+        <div class="section-body">
+          <ol class="numbered-list">
+            <li><span><strong>Main goal</strong> — provide value to the prospect.</span></li>
+            <li><span><strong>How to begin</strong> — recap previous conversations to ensure a shared understanding.</span></li>
+            <li><span><strong>Include</strong> — confirm timeline, discuss purchasing process, advise on best path to goals.</span></li>
+            <li><span><strong>Avoid</strong> — showing as many features as possible; case studies unless specifically asked for or highly relevant.</span></li>
+            <li><span><strong>1–10 closing technique</strong> — help the buyer weigh pros and cons. If they give a number lower than 6, back up to Explore and figure out what you missed. Do not pick a number for them or offer an immediate discount.</span></li>
+            <li><span><strong>Junior employees</strong> — treat them the same as your target persona; they're likely researching for the decision-maker.</span></li>
+            <li><span><strong>Determine timeline</strong> — ask when they need to achieve the goal, then work backwards to set the contract-sign date.</span></li>
+          </ol>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Navigation and Scroll-Spy Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const navItems = document.querySelectorAll('.nav-item');
+      const sections = document.querySelectorAll('.section');
+
+      // 1. Click to Scroll functionality
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const targetId = item.getAttribute('data-target');
+          const targetSection = document.getElementById(targetId);
+          
+          if (targetSection) {
+            // Scroll smoothly to the section
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Update active state immediately on click
+            navItems.forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+          }
+        });
+      });
+
+      // 2. Scroll-Spy: Auto-update active nav link based on scroll position
+      const observerOptions = {
+        root: null,
+        rootMargin: '-10% 0px -80% 0px', // Triggers when section hits top of viewport
+        threshold: 0
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Find the nav button matching this section
+            const id = entry.target.id;
+            const activeNav = document.querySelector(`.nav-item[data-target="${id}"]`);
+            
+            if (activeNav) {
+              navItems.forEach(nav => nav.classList.remove('active'));
+              activeNav.classList.add('active');
+            }
+          }
+        });
+      }, observerOptions);
+
+      sections.forEach(section => observer.observe(section));
+    });
+  </script>
+</body>
+</html>
